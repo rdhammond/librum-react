@@ -14,10 +14,9 @@ class BookDetails extends Component {
 		this.setState({notes: e.target.value});
 	}
 
-	handleCloseClick() {
+	handleCloseClick(e) {
 		this.props.onNotesChanged(this.props.book, this.state.notes);
-		// ** TODO: Probaby won't work out of the box
-		$('#bookDetails').dialog('hide');
+		$('#bookDetails').dialog('hide');	// ** TODO: Will this work?
 	}
 
 	yearStr(book) {

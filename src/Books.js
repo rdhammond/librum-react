@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Pager from 'Pager';
 import BookDetails from 'BookDetails';
+import Alert from 'Alert';
 
 class Book extends Component {
 	constructor(props) {
@@ -53,8 +54,8 @@ class Books extends Component {
 			page: 0,
 			pageSize: 25,
 			bookDetail: null,
-			errorHeader: null,
-			errorMsg: null
+			alertHeader: null,
+			alertMsg: null
 		};
 		this.handlePageChanged = this.handlePageChanged.bind(this);
 		this.handleBooksChanged = this.handleBooksChanged.bind(this);
@@ -78,17 +79,34 @@ class Books extends Component {
 		this.setState({bookDetail});
 	}
 
-	handleErrorHeaderChanged(errorHeader) {
-		this.setState({errorHeader});
+	handleErrorHeaderChanged(alertHeader) {
+		this.setState({alertHeader});
 	}
 
-	handleErrorMsgChanged(errorMsg) {
-		this.setState({errorMsg});
+	handleErrorMsgChanged(alertMsg) {
+		this.setState({alertMsg});
 	}
 
 	handleDetailsChanged(book, notes) {
-		// ** TODO: Post back to server;
+		const url = this.props.dataUrl + '/books';
+		const books = this.state.books;
 		book.notes = notes;
+
+		$.ajax({
+			url,
+			data: JSON.stringify(book),
+			method: 'PUT',
+			success: (result) => {
+				if (result.error) {
+					this.setState({
+						alertHeader: 'Oh no!',
+						alertMsg: 'Something went wrong and your changes weren\'t saved.'
+					});
+					return;
+				}
+				this.setState(books);
+			}
+		});
 	}
 
 	render() {
@@ -96,8 +114,8 @@ class Books extends Component {
 		const page = this.state.page;
 		const pageSize = this.state.pageSize;
 		const bookDetail = this.state.bookDetail;
-		const errorHeader = this.state.errorHeader;
-		const errorMsg = this.state.errorMsg;
+		const alertHeader = this.state.alertHeader;
+		const alertMsg = this.state.alertMsg;
 		const maxPages = Math.ceil(books.length / pageSize);
 
 		const rows = books
@@ -106,14 +124,12 @@ class Books extends Component {
 				<Book book={book} onClick={this.handleBookDetailChanged} />
 			);
 
+		let 
+
 		return (
 			<h1>Books</h1>
-			{(errorHeader && errorMsg) &&
-			<div class="alert alert-danger hidden" role="alert">
-				<strong>{errorHeader}</strong>
-				<span>{errorMsg}</span>
-			</div>}
-			{(books.length < 1) &&
+			<Alert header={alertHeader} msg={alertMsg} type="danger" />
+			{if (books.length < 1) 
 			<h2 class="text-center text-muted">No results found.</h2>
 			}
 			{(books.length >= 1) &&

@@ -26,14 +26,15 @@ class App extends Component {
 	render() {
 		const filter = this.state.filter;
 		const contentId = this.state.contentId;
+		const dataUrl = this.props.dataUrl;
 
 		let content = null;
 		switch(contentId) {
 			case 'add-book':
-				content = <AddBook />;
+				content = <AddBook dataUrl={dataUrl} />;
 				break;
 			default:
-				content = <Books filter={filter} onFilterChange={this.handleFilterChange} />
+				content = <Books dataUrl={dataUrl} filter={filter} onFilterChange={this.handleFilterChange} />
 		}
 
 		return (
