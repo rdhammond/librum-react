@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import axios from 'axios';
+import $ from 'jquery';
 
-class BookDetails extends Component {
+export class BookDetails extends Component {
 	constructor(props) {
 		super(props);
 		this.state.notes = this.props.book.notes;
@@ -16,7 +18,7 @@ class BookDetails extends Component {
 
 	handleCloseClick(e) {
 		this.props.onNotesChanged(this.props.book, this.state.notes);
-		$('#bookDetails').dialog('hide');	// ** TODO: Will this work?
+		$('#bookDetails').dialog('hide');
 	}
 
 	yearStr(book) {
@@ -84,5 +86,3 @@ class BookDetails extends Component {
 		);
 	}
 }
-
-export default BookDetails;

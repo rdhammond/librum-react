@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
+import axios from 'axios'; 
 
 const DEFAULT_COVER = 'img/cover-placeholder.png';
 
-class AddBook extends Component {
+export class AddBook extends Component {
 	constructor(props) {
 		super(props);
+
+		this.axios = axios.create({
+			baseURL: this.props.dataUrl,
+			headers: { 'Content-Type': 'multipart/form-data' }
+		});
+
 		this.state = {
 			alertHeader: null,
 			alertMsg: null,
@@ -71,21 +78,13 @@ class AddBook extends Component {
 	}
 
 	handleCoverChanged(cover) {
-		this.setState({cover});
+		this.setState({cover: cover.files[0]});
 		
-		const url = this.props.dataUrl + '/covers/preview';
 		const formData = new FormData();
 		formData.append('cover', this.state.cover);
 
-		$.ajax({
-			url,
-			data: formData,
-			processData: false,
-			type: 'POST',
-			contentType: 'multipart/form-data',
-			mimeType: 'multipart/form-data',
-			success: (result) => this.handleCoverUrlChanged(result)
-		});
+		this.axios.post('covers/preview', data)
+		.then(result => this.handleCoverUrlChanged(result));
 	}
 
 	handleCoverUrlChanged(result) {
@@ -101,7 +100,6 @@ class AddBook extends Component {
 	}
 
 	handleSubmit() {
-		const url = this.props.dataUrl + '/books';
 		const formData = new FormData();
 		formData.append('cover', this.state.cover);
 		formData.append('title', this.state.title);
@@ -111,18 +109,11 @@ class AddBook extends Component {
 		formData.append('publisher', this.state.publisher);
 		formData.append('estValue', this.state.estValue);
 
-		$.ajax({
-			url,
-			data: formData,
-			processData: false,
-			type: 'POST',
-			contentType: 'multipart/form-data',
-			mimeType: 'multipart/form-data',
-			success: (result) => this.handleBookAdded(result)
-		});
+		this.axios.post('books', formData)
+		.then(result => this.handleBookAdded(result));
 	}
 
-	handleBookAdded(result) {
+	handleBookAdded(response) {
 		if (response.error) {
 			this.setState({
 				alertHeader: 'Failed.',
@@ -147,7 +138,7 @@ class AddBook extends Component {
 			title: '',
 			author: '',
 			year: null,
-			era: 'CE',
+			era: '',
 			publisher: '',
 			estValue: 0
 		});
@@ -191,6 +182,7 @@ class AddBook extends Component {
 								</div>
 								<div class="col-md-2">
 									<select class="form-control" value={era} onChange={this.handleEraChanged}>
+										<option value=""></option>
 										<option value="CE">CE</option>
 										<option value="BCE">BCE</option>
 									</select>
@@ -219,5 +211,3 @@ class AddBook extends Component {
 		);
 	}
 }
-
-export default AddBook;

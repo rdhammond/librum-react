@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import Pager from 'Pager';
-import BookDetails from 'BookDetails';
-import Alert from 'Alert';
+import Pager from './Pager';
+import BookDetails from './BookDetails';
+import Alert from './Alert';
+import axios from 'axios';
 
-class Book extends Component {
+export class Book extends Component {
 	constructor(props) {
 		super(props);
 		this.handleClick = this.handleClick.bind(this);
@@ -17,7 +18,7 @@ class Book extends Component {
 
 
 	thumbnailUrl(book) {
-		return 'covers/thumbnail/' + book._id;
+		return this.props.dataUrl + 'covers/thumbnail/' + book._id;
 	}
 
 	yearStr(book) {
@@ -49,6 +50,11 @@ class Book extends Component {
 class Books extends Component {
 	constructor(props) {
 		super(props);
+
+		this.axios = axios.create({
+			baseUrl: this.props.dataUrl
+		});
+
 		this.state = {
 			books: [],
 			page: 0,
@@ -63,6 +69,7 @@ class Books extends Component {
 		this.handleErrorHeaderChanged = this.handleErrorHeaderChanged.bind(this);
 		this.handleErrorMsgChanged = this.handleErrorMsgChanged.bind(this);
 		this.handleDetailsChanged = this.handleDetailsChanged.bind(this);
+		this.handleBookSent = this.handleBookSent.bind(this);
 		this.thumbnailUrl = this.thumbnailUrl.bind(this);
 		this.yearStr = this.yearStr.bind(this);
 	}
@@ -88,28 +95,26 @@ class Books extends Component {
 	}
 
 	handleDetailsChanged(book, notes) {
-		const url = this.props.dataUrl + '/books';
 		const books = this.state.books;
 		book.notes = notes;
 
-		$.ajax({
-			url,
-			data: JSON.stringify(book),
-			method: 'PUT',
-			success: (result) => {
-				if (result.error) {
-					this.setState({
-						alertHeader: 'Oh no!',
-						alertMsg: 'Something went wrong and your changes weren\'t saved.'
-					});
-					return;
-				}
-				this.setState(books);
-			}
-		});
+		this.axios.put(url, data)
+		.then(result => this.handleBookSent(result));
+	}
+
+	handleBookSent(result) {
+		if (result.error) {
+			this.setState({
+				alertHeader: 'Oh no!',
+				alertMsg: 'Something went wrong and your changes weren\'t saved.'
+			});
+			return;
+		}
+		this.setState(books);
 	}
 
 	render() {
+		const dataUrl = this.props.dataUrl;
 		const books = this.state.books;
 		const page = this.state.page;
 		const pageSize = this.state.pageSize;
@@ -121,7 +126,7 @@ class Books extends Component {
 		const rows = books
 			.slice(page*pageSize, (page+1)*pageSize + 1)
 			.map((book) =>
-				<Book book={book} onClick={this.handleBookDetailChanged} />
+				<Book dataUrl={dataUrl} book={book} onClick={this.handleBookDetailChanged} />
 			);
 
 		let 
@@ -129,10 +134,10 @@ class Books extends Component {
 		return (
 			<h1>Books</h1>
 			<Alert header={alertHeader} msg={alertMsg} type="danger" />
-			{if (books.length < 1) 
+			{books.length < 1 &&
 			<h2 class="text-center text-muted">No results found.</h2>
 			}
-			{(books.length >= 1) &&
+			{books.length >= 1 &&
 			<Pager page={page} maxPages={maxPages} onPageChanged={this.handlePageChanged} />
 			<table class="books table table-striped table-hover">
 				<thead>
@@ -154,5 +159,3 @@ class Books extends Component {
 		);
 	}
 }
-
-export default Books;
