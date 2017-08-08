@@ -8,14 +8,14 @@ class Alert extends Component {
 	render() {
 		const header = this.props.header;
 		const msg = this.props.msg;
-		const type = 'alert-' + (this.props.type || 'error')
+		const type = 'alert alert-' + (this.props.type || 'danger')
 		if (!header || !msg)
 			return null;
 
 		return (
-			<div class="alert" className={type} role="alert">
-				<strong>{header}</strong>
-				<span>{msg}</span>
+			<div className={type} role="alert">
+				<strong className="alert-header">{header}</strong>
+				<span className="alert-msg">{msg}</span>
 			</div>
 		);
 	}

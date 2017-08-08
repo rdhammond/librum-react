@@ -7,29 +7,33 @@ class Sidebar extends Component {
 		this.handleAddBookClicked = this.handleAddBookClicked.bind(this);
 	}
 
-	handleBooksClicked(e) {
+	handleBooksClicked() {
 		this.props.handleContentIdChange('books');
-	]
+	}
 
-	handleAddBookClicked(e) {
+	handleAddBookClicked() {
 		this.props.handleContentIdChange('add-book');
 	}
 
 	render() {
 		const contentId = this.props.contentId;
+		const booksTabClass = 'books-tab'
+			+ (contentId==='books' ? ' active' : '');
+		const addBookTabClass = 'add-book-tab'
+			+ (contentId==='add-book' ? ' active' : '');
 
 		return (
-			<ul class="nav nav-sidebar">
-				<li class={contentId==='books' ? 'active' : ''}>
+			<ul className="nav nav-sidebar">
+				<li className={booksTabClass}>
 					<a href="#" onClick={this.handleBooksClicked}>
 						Books
-						{contentId==='books' && <span class="sr-only">(current)</span>}
+						{contentId==='books' && <span className="sr-only">(current)</span>}
 					</a>
 				</li>
-				<li class={contentId==='add-book' ? 'active', ''}>
+				<li className={addBookTabClass}>
 					<a href="#" onClick={this.handleAddBookClicked}>
 						Add Book
-						{contentId==='add-book' && <span class="sr-only">(current)</span>}
+						{contentId==='add-book' && <span className="sr-only">(current)</span>}
 					</a>
 				</li>
 			</ul>
