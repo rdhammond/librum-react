@@ -106,7 +106,7 @@ class AddBook extends Component {
 			estValue: this.state.estValue
 		})
 		.then(result => this.handleBookAdded(result))
-		.catch(error => this.handleBookAdded({error}));
+		.catch(error => this.handleBookAdded(error));
 	}
 
 	handleBookAdded(response) {
@@ -122,7 +122,7 @@ class AddBook extends Component {
 
 		return this.api.setCover(response._id, this.state.cover)
 		.then(result => this.handleCoverSet(result))
-		.catch(error => this.handleCoverSet({error}));
+		.catch(error => this.handleCoverSet(error));
 	}
 
 	handleCoverSet(response) {
