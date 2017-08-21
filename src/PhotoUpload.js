@@ -16,20 +16,22 @@ class PhotoUpload extends Component {
 	}
 
 	render() {
-		const coverUrl = this.props.coverUrl;
+		const thumbnailUrl = this.props.thumbnailUrl;
 		const cover = this.props.cover;
 
 		return (
-			<div class="photo-upload">
-				<div class="preview">
-					<img class="cover center-block" src={coverUrl} />
+			<div className="photo-upload">
+				<div className="preview">
+					<img className="cover center-block" src={thumbnailUrl} />
 				</div>
-				<div class="controls text-center">
-					<input id="fileupload" class="fileupload" type="file" onChange={this.handleCoverChanged} />
-					<button class="selectfile btn btn-default" type="button" ref={this.handleSelectFileClicked} />
-					<p class="help-block">Cover changes are not permanent until book is added.</p>
+				<div className="controls text-center">
+					<input id="cover" className="cover" type="file" onChange={this.handleCoverChanged} />
+					<button className="selectfile btn btn-default" type="button" ref={this.handleSelectFileClicked} />
+					<p className="help-block">Cover changes are not permanent until book is added.</p>
 				</div>
 			</div>
 		);
 	}
 }
+
+export default PhotoUpload;

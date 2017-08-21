@@ -2,170 +2,96 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import AddBook from '../AddBook';
 import LibrumApi from '../LibrumApi';
+import moxios from 'moxios';
 
-function setTestState(ctrl) {
-	ctrl.setState({
-		title: 'Test',
-		author: 'Test2',
-		estValue: 1
-	});
+import './moxios-extensions';
+
+const testState = {
+	title: 'XYZ',
+	author: '123',
+	year: 1902,
+	era: 'BCE',
+	estValue: 1
+};
+
+beforeEach(() => {
+	moxios.install();
+});
+
+afterEach(() => {
+	moxios.uninstall();
+});
+
+function expectAlert(add, type) {
+	const state = add.state();
+	expect(state.alertHeader).toBeTruthy();
+	expect(state.alertMsg).toBeTruthy();
+	expect(state.alertType).toBe(type);
 }
 
-test('Sets error if error returned', () => {
-	console.log(LibrumApi);
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({error: 'XYZ'}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.alertHeader).toBeTruthy();
-	expect(addBook.state.alertMsg).toBeTruthy();
-	expect(addBook.state.alertType).not.toBe('success');
-});
-
-test('Sets error if promise rejected', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.alertHeader).toBeTruthy();
-	expect(addBook.state.alertMsg).toBeTruthy();
-	expect(addBook.state.alertType).not.toBe('success');
-});
-
-test('Patches in cover data after post', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({})),
-			setCover: jest.fn(() => Promise.resolve({}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.setState({cover: {}});
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.alertHeader).toBeTruthy();
-	expect(addBook.state.alertMsg).toBeTruthy();
-	expect(addBook.state.alertType).toBe('success');
-});
-
-test('Sets error if patch fails', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({})),
-			setCover: jest.fn(() => Promise.resolve({error: 'test'}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.setState({cover: {}});
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.alertHeader).toBeTruthy();
-	expect(addBook.state.alertMsg).toBeTruthy();
-	expect(addBook.state.alertType).not.toBe('success');
-});
-
-test('Sets error if patch rejects', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({})),
-			setCover: jest.fn(() => Promise.reject('Test'))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.setState({cover: {}});
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.alertHeader).toBeTruthy();
-	expect(addBook.state.alertMsg).toBeTruthy();
-	expect(addBook.state.alertType).not.toBe('success');
-});
-
-test('Resets state after post/patch succeeds', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({})),
-			setCover: jest.fn(() => Promise.resolve({}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.setState({cover: {}});
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.title).toBeFalsy();
-});
-
-test('Resets state after post fails', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({error: 'Test'}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.title).toBeFalsy();
-});
-
-test('Resets state after patch fails', () => {
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			postBook: jest.fn(() => Promise.resolve({})),
-			setCover: jest.fn(() => Promise.resolve({error: 'ABC'}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	setTestState(addBook);
-	addBook.setState({cover: {}});
-	addBook.find('#frmAddBook').simulate('submit');
-	expect(addBook.state.title).toBeFalsy();
-});
-
-test('Sets new coverUrl if preview succeeds', () => {
-	function PhotoUpload() {
-		return (<input type="file" onChange={onChanged} />);
+function expectReset(add) {
+	for (let key of ['title', 'author', 'year', 'era', 'publisher', 'era']) {
+		expect(add.find('#' + key).prop('value')).toBeFalsy();
 	}
+	expect(add.state().cover).toBeFalsy();
+}
 
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			previewCover: jest.fn(() => Promise.resolve({base64uri: 'test'}))
-		};
-	});
-
-	const addBook = shallow(<AddBook />);
-	addBook.find(PhotoUpload).render().simulate('change');
-	expect(addBook.state.coverUrl).toBe('test');
+test('Upload cover set alerts on error', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	moxios.respondErr();
+	await add.instance().handleCoverChanged({});
+	expectAlert(add, 'danger');
 });
 
-test('Sets error if preview fails', () => {
-	function PhotoUpload() {
-		return (<input type="file" onChange={onChanged} />);
-	}
+test('Upload cover clears cover on error', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	add.setState({cover: {}});
+	moxios.respondErr();
+	await add.instance().handleCoverChanged({});
+	expect(add.state().cover).toBeFalsy();
+});
 
-	LibrumApi.mockImplementationOnce(() => {
-		return {
-			previewCover: jest.fn(() => Promise.resolve({error: 'XYZ'}))
-		};
-	});
+test('Upload cover sets new cover on success', async () => {
+	const cover = {};
+	const add = shallow(<AddBook dataUrl='/' />);
+	moxios.respond({base64uri: 'XXX'});
+	await add.instance().handleCoverChanged(cover);
+	expect(add.state().cover).toBe(cover);
+});
 
-	const addBook = shallow(<AddBook />);
-	addBook.find(PhotoUpload).render().simulate('change');
-	expect(addBook.state.alertHeader).toBeTruthy();
-	expect(addBook.state.alertMsg).toBeTruthy();
-	expect(addBook.state.alertType).not.toBe('success');
+test('Upload cover sets thumbnail uri on success', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	moxios.respond({base64uri: 'XXX'});
+	await add.instance().handleCoverChanged({});
+	expect(add.state().thumbnailUrl).toBe('XXX');
+});
+
+test('Sets success if post works', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	moxios.respond({id:1});
+	await add.instance().handleSubmit();
+	expectAlert(add, 'success');
+});
+
+test('Resets state if error returned on book post', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	add.setState(testState);
+	moxios.respond({id:1});
+	await add.instance().handleSubmit();
+	expectReset(add);
+});
+
+test('Sets error if error returned on book post', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	moxios.respondErr();
+	await add.instance().handleSubmit();
+	expectAlert(add, 'danger');
+});
+
+test('Resets state if error returned on book post', async () => {
+	const add = shallow(<AddBook dataUrl='/' />);
+	add.setState(testState);
+	moxios.respondErr();
+	await add.instance().handleSubmit();
+	expectReset(add);
 });

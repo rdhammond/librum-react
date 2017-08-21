@@ -3,26 +3,11 @@ import axios from 'axios';
 class LibrumApi {
 	constructor(baseURL) {
 		// Trying to set baseURL as a default will screw with
-		// unit tests.
+		// automated tests.
 		this.baseURL = baseURL;
 	}
 
-	unpackResult(response) {
-		// This unwinds any axios error responses.
-		//
-		if (response.response)
-			response = response.response;
-
-		const data = response.data || {};
-		if (response.status != 200 && !data.error)
-			data.error = response.status + ' error';
-
-		return data.error
-			? Promise.reject(data)
-			: Promise.resolve(data);
-	}
-
-	sendCoverTo(cover, url, method) {
+	sendCoverTo(url, cover, method) {
 		const formData = new FormData();
 		formData.append('cover', cover);
 
@@ -33,22 +18,34 @@ class LibrumApi {
 		});
 	}
 
-	previewCover(cover) {
-		return this.sendCoverTo(cover, 'covers/preview', 'POST')
-		.then(res => this.unpackResult(res))
-		.catch(error => this.unpackResult(error));
+	async previewCover(cover) {
+		try {
+			const resp = await this.sendCoverTo('covers/preview', cover, 'POST');
+			return resp.data;
+		}
+		catch(e) {
+			return e.response.data;
+		}
 	}
 
-	postBook(data) {
-		return axios.post('books', data, {baseURL: this.baseURL})
-		.then(res => this.unpackResult(res))
-		.catch(error => this.unpackResult(error));
+	async postBook(data) {
+		try {
+			const resp = await axios.post('books', data, {baseURL: this.baseURL});
+			return resp.data;
+		}
+		catch(e) {
+			return e.response.data;
+		}
 	}
 
-	setCover(bookId, cover) {
-		return this.sendCoverTo(cover, 'covers/' + bookId, 'PATCH')
-		.then(res => this.unpackResult(res))
-		.catch(error => this.unpackResult(error));
+	async setCover(bookId, cover) {
+		try {
+			const resp = await this.sendCoverTo('covers/' + bookId, cover, 'PATCH');
+			return resp.data;
+		}
+		catch(e) {
+			return e.response.data;
+		}
 	}
 }
 

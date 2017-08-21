@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import LibrumApi from './LibrumApi';
 import Alert from './Alert';
+import PhotoUpload from './PhotoUpload'
 
 const DEFAULT_COVER = 'img/cover-placeholder.png';
 
@@ -12,14 +13,14 @@ class AddBook extends Component {
 			alertHeader: null,
 			alertMsg: null,
 			alertType: null,
-			coverUrl: DEFAULT_COVER,
+			thumbnailUrl: DEFAULT_COVER,
 			cover: null,
 			title: '',
 			author: '',
-			year: null,
+			year: '',
 			era: '',
 			publisher: '',
-			estValue: null
+			estValue: ''
 		};
 		this.handleAlertHeaderChanged = this.handleAlertHeaderChanged.bind(this);
 		this.handleAlertMsgChanged = this.handleAlertMsgChanged.bind(this);
@@ -31,9 +32,7 @@ class AddBook extends Component {
 		this.handlePublisherChanged = this.handlePublisherChanged.bind(this);
 		this.handleEstValueChanged = this.handleEstValueChanged.bind(this);
 		this.handleCoverChanged = this.handleCoverChanged.bind(this);
-		this.handleCoverUrlChanged = this.handleCoverUrlChanged.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleBookAdded = this.handleBookAdded.bind(this);
 		this.reset = this.reset.bind(this);
 
 		this.api = new LibrumApi(this.props.dataUrl);
@@ -77,41 +76,34 @@ class AddBook extends Component {
 		this.state.estValue = e.target.value;
 	}
 
-	handleCoverChanged(cover) {
-		this.setState({cover});
-		
-		return this.api.previewCover(cover)
-		.then(result => this.handleCoverUrlChanged(result));
-	}
-
-	handleCoverUrlChanged(result) {
-		if (result.error) {
+	async handleCoverChanged(cover) {
+		const data = await this.api.previewCover(cover);
+		if (data.code) {
 			this.setState({
 				alertHeader: 'Uh oh.',
 				alertMsg: 'Something went wrong uploading to the server.',
 				alertType: 'danger'
 			});
+			this.setState({cover: null});
 			return;
 		}
-		this.setState({coverUrl: result.base64uri});
+		this.setState({cover});
+		this.setState({thumbnailUrl: data.base64uri});
 	}
 
-	handleSubmit() {
-		return this.api.postBook({
+	async handleSubmit() {
+		const data = await this.api.postBook({
 			title: this.state.title,
 			author: this.state.author,
 			year: this.state.year,
 			era: this.state.era,
 			publisher: this.state.publisher,
-			estValue: this.state.estValue
-		})
-		.then(result => this.handleBookAdded(result))
-		.catch(error => this.handleBookAdded(error));
-	}
+			estValue: this.state.estValue,
+			cover: this.state.cover
+		});
+		this.reset();
 
-	handleBookAdded(response) {
-		if (response.error) {
-			this.reset();
+		if (data.code) {
 			this.setState({
 				alertHeader: 'Failed.',
 				alertMsg: 'Check all your values and try again.',
@@ -119,24 +111,6 @@ class AddBook extends Component {
 			});
 			return;
 		}
-
-		return this.api.setCover(response._id, this.state.cover)
-		.then(result => this.handleCoverSet(result))
-		.catch(error => this.handleCoverSet(error));
-	}
-
-	handleCoverSet(response) {
-		this.reset();
-
-		if (response.error) {
-			this.setState({
-				alertHeader: 'Cover upload failed.',
-				alertMsg: 'Your book was added, but the cover didn\'t make it.',
-				alertType: 'warning'
-			});
-			return;
-		}
-
 		this.setState({
 			alertHeader: 'Added!',
 			alertMsg: 'You can continue to add more books below.',
@@ -146,14 +120,14 @@ class AddBook extends Component {
 	
 	reset() {
 		this.setState({
-			coverUrl: DEFAULT_COVER,
+			thumbnailUrl: DEFAULT_COVER,
 			cover: null,
 			title: '',
 			author: '',
-			year: null,
+			year: '',
 			era: '',
 			publisher: '',
-			estValue: 0
+			estValue: ''
 		});
 	}
 
@@ -161,7 +135,7 @@ class AddBook extends Component {
 		const alertHeader = this.state.alertHeader;
 		const alertMsg = this.state.alertMsg;
 		const alertType = this.state.alertType;
-		const coverUrl = this.state.coverUrl;
+		const thumbnailUrl = this.state.thumbnailUrl;
 		const cover = this.state.cover;
 		const title = this.state.title;
 		const author = this.state.author;
@@ -174,28 +148,28 @@ class AddBook extends Component {
 			<div>
 				<h1>Add book</h1>
 				<Alert header={alertHeader} msg={alertMsg} type={alertType} />
-				<form id="frmAddBook" class="container" onSubmit={this.handleSubmit}>
-					<div class="row">
-						<div class="col-md-3 cover">
-							<PhotoUpload coverUrl={coverUrl} onChanged={this.handleCoverChanged} />
+				<form id="frmAddBook" className="container" onSubmit={this.handleSubmit}>
+					<div className="row">
+						<div className="col-md-3 cover">
+							<PhotoUpload thumbnailUrl={thumbnailUrl} onChanged={this.handleCoverChanged} />
 						</div>
-						<div class="col-md-9 data">
-							<div class="form-group">
-								<label for="title">Book Title</label>
-								<input id="title" class="form-control" type="text" placeholder="Title (required)" required="true" value={title} onChange={this.handleTitleChanged} />
+						<div className="col-md-9 data">
+							<div className="form-group">
+								<label htmlFor="title">Book Title</label>
+								<input id="title" className="form-control" type="text" placeholder="Title (required)" required="true" value={title} onChange={this.handleTitleChanged} />
 							</div>
-							<div class="form-group">
-								<label for="author">Author</label>
-								<input id="author" class="form-control" type="text" placeholder="Author (required)" required="true" value={author} onChange={this.handleAuthorChanged} />
+							<div className="form-group">
+								<label htmlFor="author">Author</label>
+								<input id="author" className="form-control" type="text" placeholder="Author (required)" required="true" value={author} onChange={this.handleAuthorChanged} />
 							</div>
-							<div class="form-group">
-								<label for="year">Year</label>
-								<div class="row">
-									<div class="col-md-10">
-										<input id="year" class="form-control" type="number" placeholder="Year" min-value="1" value={year} onChange={this.handleYearChanged} />
+							<div className="form-group">
+								<label htmlFor="year">Year</label>
+								<div className="row">
+									<div className="col-md-10">
+										<input id="year" className="form-control" type="number" placeholder="Year" min="1" value={year} onChange={this.handleYearChanged} />
 									</div>
-									<div class="col-md-2">
-										<select class="form-control" value={era} onChange={this.handleEraChanged}>
+									<div className="col-md-2">
+										<select id="era" className="form-control" value={era} onChange={this.handleEraChanged}>
 											<option value=""></option>
 											<option value="CE">CE</option>
 											<option value="BCE">BCE</option>
@@ -203,22 +177,22 @@ class AddBook extends Component {
 									</div>
 								</div>
 							</div>
-							<div class="form-group">
-								<label for="publisher">Publisher</label>
-								<input id="publisher" class="form-control" type="text" placeholder="Publisher" value={publisher} onChange={this.handlePublisherChanged} />
+							<div className="form-group">
+								<label htmlFor="publisher">Publisher</label>
+								<input id="publisher" className="form-control" type="text" placeholder="Publisher" value={publisher} onChange={this.handlePublisherChanged} />
 							</div>
-							<div class="form-group">
-								<label for="estValue">Estimated Value</label>
-								<div class="input-group">
-									<span class="input-group-addon">$</span>
-									<input id="estValue" class="form-control" type="number" placeholder="Value" min-value="0" value={estValue} onChange={this.handleEstValueChanged} />
+							<div className="form-group">
+								<label htmlFor="estValue">Estimated Value</label>
+								<div className="input-group">
+									<span className="input-group-addon">$</span>
+									<input id="estValue" className="form-control" type="number" placeholder="Value" min="0" value={estValue} onChange={this.handleEstValueChanged} />
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-md-12 text-right">
-							<input class="btn btn-primary" type="submit" value="Add" />
+					<div className="row">
+						<div className="col-md-12 text-right">
+							<input className="btn btn-primary" type="submit" value="Add" />
 						</div>
 					</div>
 				</form>

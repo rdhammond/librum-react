@@ -13,14 +13,14 @@ class PrevPage extends Component {
 	render() {
 		if (this.props.disabled)
 			return (
-				<li class="disabled">
+				<li className="disabled">
 					<span aria-hidden="true">&laquo;</span>
 				</li>
 			);
 
 		return (
 			<li>
-				<a class="prev" href="#" aria-label="Previous" onClick={this.handeClick}>
+				<a className="prev" href="#" aria-label="Previous" onClick={this.handeClick}>
 					<span aria-hidden="true">&laquo;</span>
 				</a>
 			</li>
@@ -43,9 +43,9 @@ class Page extends Component {
 		const active = this.props.active;
 
 		return (
-			<li class={active ? 'active' : ''}>
-				<a class="page" href="#" onClick={this.handleClick}>{num+1}</a>
-				{active && <span class="sr-only">(current)</span>}
+			<li className={active ? 'active' : ''}>
+				<a className="page" href="#" onClick={this.handleClick}>{num+1}</a>
+				{active && <span className="sr-only">(current)</span>}
 			</li>
 		);
 	}
@@ -64,14 +64,14 @@ class NextPage extends Component {
 	render() {
 		if (this.props.disabled)
 			return (
-				<li class="disabled">
+				<li className="disabled">
 					<span aria-hidden="true">&raquo;</span>
 				</li>
 			);
 
 		return (
 			<li>
-				<a class="next" href="#" aria-label="Next" onClick={this.handleClick}>
+				<a className="next" href="#" aria-label="Next" onClick={this.handleClick}>
 					<span aria-hidden="true">&raquo;</span>
 				</a>
 			</li>
@@ -105,16 +105,16 @@ class Pager extends Component {
 		}
 
 		return (
-			<nav class="text-center" aria-label="Page navigation">
-				<ul class="pagination">
+			<nav className="text-center" aria-label="Page navigation">
+				<ul className="pagination">
 					<PrevPage page={page} disabled={page < 1} />
 					{pages}
 					<NextPage page={page} disabled={page >= (maxPages - 1)} />
 				</ul>
 			</nav>
 			{(isBottom && page >= maxPages) &&
-			<h2 class="text-center text-muted">Didn't find what you're looking for?</h2>
-			<p class="text-center text-muted">Try narrowing your search to specific authors or years.</p>
+			<h2 className="text-center text-muted">Didn't find what you're looking for?</h2>
+			<p className="text-center text-muted">Try narrowing your search to specific authors or years.</p>
 			}
 		);
 	}

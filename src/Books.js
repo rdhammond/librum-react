@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Pager from './Pager';
 import BookDetails from './BookDetails';
 import Alert from './Alert';
-import axios from 'axios';
 
 export class Book extends Component {
 	constructor(props) {
@@ -35,13 +34,13 @@ export class Book extends Component {
 
 		return (
 			<tr>
-				<td class="cover">
+				<td className="cover">
 					<img src={this.thumbnailUrl(book)} aria-hidden="true" />
 				</td>
-				<td class="title">{book.title}</td>
-				<td class="author">{book.author}</td>
-				<td class="year">{this.yearStr(book)}</td>
-				<td class="estValue">{book.estValue}</td>
+				<td className="title">{book.title}</td>
+				<td className="author">{book.author}</td>
+				<td className="year">{this.yearStr(book)}</td>
+				<td className="estValue">{book.estValue}</td>
 			</tr>
 		);
 	}
@@ -49,16 +48,10 @@ export class Book extends Component {
 
 class Books extends Component {
 	constructor(props) {
-		super(props);
-
-		this.axios = axios.create({
-			baseUrl: this.props.dataUrl
-		});
-
 		this.state = {
 			books: [],
 			page: 0,
-			pageSize: 25,
+			pageSize: 15,
 			bookDetail: null,
 			alertHeader: null,
 			alertMsg: null
@@ -72,6 +65,8 @@ class Books extends Component {
 		this.handleBookSent = this.handleBookSent.bind(this);
 		this.thumbnailUrl = this.thumbnailUrl.bind(this);
 		this.yearStr = this.yearStr.bind(this);
+
+		this.api = new LibrumApi(this.props.dataUrl);
 	}
 
 	handlePageChange(page) {
@@ -94,16 +89,12 @@ class Books extends Component {
 		this.setState({alertMsg});
 	}
 
-	handleDetailsChanged(book, notes) {
+	async handleDetailsChanged(book, notes) {
 		const books = this.state.books;
 		book.notes = notes;
 
-		this.axios.put(url, data)
-		.then(result => this.handleBookSent(result));
-	}
-
-	handleBookSent(result) {
-		if (result.error) {
+		const data = await this.api.postBook(url, data);
+		if (data.code) {
 			this.setState({
 				alertHeader: 'Oh no!',
 				alertMsg: 'Something went wrong and your changes weren\'t saved.'
@@ -129,17 +120,15 @@ class Books extends Component {
 				<Book dataUrl={dataUrl} book={book} onClick={this.handleBookDetailChanged} />
 			);
 
-		let 
-
 		return (
 			<h1>Books</h1>
 			<Alert header={alertHeader} msg={alertMsg} type="danger" />
 			{books.length < 1 &&
-			<h2 class="text-center text-muted">No results found.</h2>
+			<h2 className="text-center text-muted">No results found.</h2>
 			}
 			{books.length >= 1 &&
 			<Pager page={page} maxPages={maxPages} onPageChanged={this.handlePageChanged} />
-			<table class="books table table-striped table-hover">
+			<table className="books table table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Cover</th>
@@ -159,3 +148,5 @@ class Books extends Component {
 		);
 	}
 }
+
+export default Book;

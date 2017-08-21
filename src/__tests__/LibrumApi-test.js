@@ -1,6 +1,7 @@
 import LibrumApi from '../LibrumApi';
 import moxios from 'moxios';
-import axios from 'axios';
+
+import './moxios-extensions';
 
 var api;
 
@@ -13,101 +14,52 @@ afterEach(() => {
 	moxios.uninstall();
 });
 
-test('unpackResult amends with generic error when not given', () => {
-	const promise = axios.post('/')
-	.catch(res => api.unpackResult(res))
-	.catch(res => {
-		expect(res).toBeTruthy();
-		expect(res.error).toBe('500 error');
-	});
-
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 500 });
-	});
-	return promise;
-});
-
-test('previewCover returns OK when successful', () => {
+test('previewCover works', () => {
 	const promise = api.previewCover({})
-	.then(res => {
-		expect(res).toBeTruthy();
-		expect(res.error).toBeFalsy();
+	.then(data => {
+		expect(data).toBeTruthy();
+		expect(data.base64uri).toBe('XYZ');
 	});
 
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 200 });
-	});
+	moxios.respond({base64uri: 'XYZ'});
 	return promise;
 });
 
-test('previewCover returns error when failed', () => {
-	const promise = api.previewCover({})
-	.catch(res => {
-		expect(res).toBeTruthy();
-		expect(res.error).toBe('XYZ');
-	});
-
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 500, response: {error: 'XYZ'} });
-	});
+test('previewCover handles error', () => {
+	const promise = api.previewCover({}).thenExpectErr();
+	moxios.respondErr();
 	return promise;
 });
 
-test('postBook returns id when successful', () => {
-	const promise = api.previewCover({})
-	.then(res => {
-		expect(res).toBeTruthy();
-		expect(res._id).toBe(1);
-	});
-
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 200, response: {_id: 1} });
-	});
-	return promise;
-});
-
-test('postBook returns error when failed', () => {
+test('postBook works', () => {
 	const promise = api.postBook({})
-	.catch(res => {
-		expect(res).toBeTruthy();
-		expect(res.error).toBe('123');
+	.then(data => {
+		expect(data).toBeTruthy();
+		expect(data.id).toBe(1);
 	});
 
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 500, response: {error: '123'} });
-	});
+	moxios.respond({id: 1});
 	return promise;
 });
 
-test('setCover returns OK when successful', () => {
-	const promise = api.setCover(1, {})
-	.then(res => {
-		expect(res).toBeTruthy();
-		expect(res.error).toBeFalsy();
-	});
-
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 200 });
-	});
+test('postBook handles error', () => {
+	const promise = api.postBook({}).thenExpectErr();
+	moxios.respondErr();
 	return promise;
 });
 
-test('setCover returns error when failed', () => {
+test('setCover works', () => {
 	const promise = api.setCover(1, {})
-	.catch(res => {
-		expect(res).toBeTruthy();
-		expect(res.error).toBe('1bD');
+	.then(data => {
+		expect(data).toBeFalsy();
 	});
 
-	moxios.wait(function() {
-		moxios.requests.mostRecent()
-		.respondWith({ status: 500, response: {error: '1bD'} });
-	});
+	moxios.respond('');
+	return promise;
+});
+
+test('setCover handles error', () => {
+	const promise = api.setCover(1, {}).thenExpectErr();
+	moxios.respondErr();
 	return promise;
 });

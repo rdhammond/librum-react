@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import $ from 'jquery';
 
 export class BookDetails extends Component {
@@ -39,23 +38,23 @@ export class BookDetails extends Component {
 		const notes = this.state.notes;
 
 		return (
-			<div id="bookDetails" class="modal fade" tabindex="-1" role="dialog">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<button class="close" type="button" data-dismiss="modal" aria-label="Close">
+			<div id="bookDetails" className="modal fade" tabindex="-1" role="dialog">
+				<div className="modal-dialog" role="document">
+					<div className="modal-content">
+						<div className="modal-header">
+							<button className="close" type="button" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
-							<h4 class="modal-title">{book.title}</h4>
+							<h4 className="modal-title">{book.title}</h4>
 						</div>
-						<div class="modal-body">
-							<div class="container-fluid">
-								<div class="row">
-									<div class="col-sm-12 col-md-4 cover">
-										<img class="img-responsive img-thumbnail" src={this.coverUrl(book)} />
+						<div className="modal-body">
+							<div className="container-fluid">
+								<div className="row">
+									<div className="col-sm-12 col-md-4 cover">
+										<img className="img-responsive img-thumbnail" src={this.coverUrl(book)} />
 									</div>
-									<div class="col-sm-12 col-md-8 details">
-										<dl class="dl-horizontal">
+									<div className="col-sm-12 col-md-8 details">
+										<dl className="dl-horizontal">
 											<dt>Author</dt>
 											<dd>{book.author}</dd>
 											<dt>Publisher</dt>
@@ -65,11 +64,11 @@ export class BookDetails extends Component {
 											<dt>Estimated Value</dt>
 											<dd>{book.estValue}</dd>
 										</dl>
-										<div class="form-group">
-											<label for="notes">Notes</label>
-											<textarea class="form-control" value={this.state.notes} placeholder="Notes (opt.)" rows="5"></textarea>
+										<div className="form-group">
+											<label htmlFor="notes">Notes</label>
+											<textarea className="form-control" value={this.state.notes} placeholder="Notes (opt.)" rows="5"></textarea>
 										</div>
-										<div class="links">
+										<div className="links">
 											<a href={this.googleUrl(book.title)} target="_blank">Search for more info on title</a>
 											<a href={this.googleUrl(book.author)} target="_blank">Search for more info on author</a>
 										</div>
@@ -77,8 +76,8 @@ export class BookDetails extends Component {
 								</div>
 							</div>
 						</div>
-						<div class="modal-footer">
-							<button class="btn btn-default" type="button" onClick={this.handleCloseClick}>Close</button>
+						<div className="modal-footer">
+							<button className="btn btn-default" type="button" onClick={this.handleCloseClick}>Close</button>
 						</div>
 					</div>
 				</div>

@@ -39,12 +39,12 @@ class App extends Component {
 
 		return (
 			<Header filter={filter} onFilterChange={this.handleFilterChange} />
-			<div class="container-fluid">
-				<div class="row">
-					<div class="col-sm-3 col-md-2">
+			<div className="container-fluid">
+				<div className="row">
+					<div className="col-sm-3 col-md-2">
 						<Sidebar contentId={contentId} />
 					</div>
-					<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
+					<div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
 						{content}
 					</div>
 				</div>
