@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export class Book extends Component {
+class Book extends Component {
 	constructor(props) {
 		super(props);
 		this.handleClick = this.handleClick.bind(this);
@@ -30,7 +30,7 @@ export class Book extends Component {
 		const book = this.props.book;
 
 		return (
-			<tr>
+			<tr onClick={this.handleClick}>
 				<td className="cover">
 					<img src={this.thumbnailUrl(book)} aria-hidden="true" />
 				</td>

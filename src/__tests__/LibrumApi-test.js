@@ -63,3 +63,49 @@ test('setCover handles error', () => {
 	moxios.respondErr();
 	return promise;
 });
+
+test('search works if no parameters specified', () => {
+	const resp = {};
+	const promise = api.search()
+	.then(data => {
+		expect(data).toBe(resp);
+	});;
+
+	moxios.wait(() => {
+		moxios.requests.mostRecent()
+		.respondWith({status: 200, response: resp});
+	});
+	return promise;
+});
+
+test('search looks for query if specified', () => {
+	const promise = api.search({query: 'search test'})
+	.then(data => {
+		expect(data).toBe('search test');
+	});
+
+	moxios.wait(() => {
+		const request = moxios.requests.mostRecent();
+		request.respondWith({status: 200, response: request.config.q});
+	});
+	return promise;
+});
+
+test('search sets page number if specified', () => {
+	const promise = api.search({pageNum: 4})
+	.then(data => {
+		expect(data).toBe(4);
+	});
+
+	moxios.wait(() => {
+		const request = moxios.requests.mostRecent();
+		request.respondWith({status: 200, response: request.config.pn});
+	});
+	return promise;
+});
+
+test('search handles error', () => {
+	const promise = api.search({}).thenExpectErr();
+	moxios.respondErr();
+	return promise;
+});

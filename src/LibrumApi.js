@@ -7,6 +7,15 @@ class LibrumApi {
 		this.baseURL = baseURL;
 	}
 
+	async callAxios(cb) {
+		try {
+			return (await cb()).data;
+		}
+		catch(e) {
+			return e.response.data || {code: 'IntervalServerError'};
+		}
+	}
+
 	sendCoverTo(url, cover, method) {
 		const formData = new FormData();
 		formData.append('cover', cover);
@@ -18,34 +27,30 @@ class LibrumApi {
 		});
 	}
 
-	async previewCover(cover) {
-		try {
-			const resp = await this.sendCoverTo('covers/preview', cover, 'POST');
-			return resp.data;
-		}
-		catch(e) {
-			return e.response.data;
-		}
+	previewCover(cover) {
+		return this.callAxios(() => this.sendCoverTo('covers/preview', cover, 'POST'));
 	}
 
-	async postBook(data) {
-		try {
-			const resp = await axios.post('books', data, {baseURL: this.baseURL});
-			return resp.data;
-		}
-		catch(e) {
-			return e.response.data;
-		}
+	postBook(data) {
+		return this.callAxios(() => axios.post('books', data, {baseURL: this.baseURL}));
 	}
 
-	async setCover(bookId, cover) {
-		try {
-			const resp = await this.sendCoverTo('covers/' + bookId, cover, 'PATCH');
-			return resp.data;
+	setCover(bookId, cover) {
+		return this.callAxios(() => this.sendCoverTo('covers/' + bookId, cover, 'PATCH'));
+	}
+
+	search(opts) {
+		const params = {};
+		if (opts) {
+			if (opts.query)
+				params.q = opts.query;
+
+			const pn = parseInt(opts.pageNum, 10);
+			if (pn >= 1)
+				params.pn = pn;
 		}
-		catch(e) {
-			return e.response.data;
-		}
+
+		return this.callAxios(() => axios.get('books', params, {baseURL: this.baseURL}));
 	}
 }
 

@@ -6,6 +6,7 @@ import Book from './Book';
 
 class Books extends Component {
 	constructor(props) {
+		super(props);
 		this.state = {
 			books: [],
 			page: 0,
@@ -25,6 +26,10 @@ class Books extends Component {
 		this.yearStr = this.yearStr.bind(this);
 
 		this.api = new LibrumApi(this.props.dataUrl);
+	}
+
+	componentDidMount() {
+		const books = 
 	}
 
 	handlePageChange(page) {
@@ -48,14 +53,15 @@ class Books extends Component {
 	}
 
 	async handleDetailsChanged(book, notes) {
+		const url = this.props.dataUrl + 'book/' + book._id;
 		const books = this.state.books;
-		book.notes = notes;
 
-		const data = await this.api.postBook(url, data);
+		const data = await this.api.postBook(url, book);
 		if (data.code) {
 			this.setState({
 				alertHeader: 'Oh no!',
-				alertMsg: 'Something went wrong and your changes weren\'t saved.'
+				alertMsg: 'Something went wrong and your changes weren\'t saved.',
+				alertType: 'danger'
 			});
 			return;
 		}
