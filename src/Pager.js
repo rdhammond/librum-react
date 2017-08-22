@@ -1,83 +1,7 @@
 import React, { Component } from 'react';
-
-class PrevPage extends Component {
-	constructor(props) {
-		super(props);
-		this.handleClick = this.handleClick.bind(this);
-	}
-
-	handleClick() {
-		this.props.onClick(this.props.page - 1);
-	}
-
-	render() {
-		if (this.props.disabled)
-			return (
-				<li className="disabled">
-					<span aria-hidden="true">&laquo;</span>
-				</li>
-			);
-
-		return (
-			<li>
-				<a className="prev" href="#" aria-label="Previous" onClick={this.handeClick}>
-					<span aria-hidden="true">&laquo;</span>
-				</a>
-			</li>
-		);
-	}
-}
-
-class Page extends Component {
-	constructor(props) {
-		super(props);
-		this.handleClick = this.handleClick.bind(this);
-	}
-
-	handleClick() {
-		this.props.onClick(this.props.num);
-	}
-
-	render() {
-		const num = this.props.num;
-		const active = this.props.active;
-
-		return (
-			<li className={active ? 'active' : ''}>
-				<a className="page" href="#" onClick={this.handleClick}>{num+1}</a>
-				{active && <span className="sr-only">(current)</span>}
-			</li>
-		);
-	}
-}
-
-class NextPage extends Component {
-	constructor(props) {
-		super(props);
-		this.handleClick = this.handleClick.bind(this);
-	}
-
-	handleClick() {
-		this.props.onClick(this.props.page + 1);
-	}
-
-	render() {
-		if (this.props.disabled)
-			return (
-				<li className="disabled">
-					<span aria-hidden="true">&raquo;</span>
-				</li>
-			);
-
-		return (
-			<li>
-				<a className="next" href="#" aria-label="Next" onClick={this.handleClick}>
-					<span aria-hidden="true">&raquo;</span>
-				</a>
-			</li>
-		);
-	}
-}
+import PagerPrev from './PagerPrev';
+import PagerNum from './PagerNum';
+import PagerNext from './PagerNext';
 
 class Pager extends Component {
 	constructor(props) {
@@ -101,15 +25,15 @@ class Pager extends Component {
 
 		let pages = [];
 		for (let i=startPage; i<=endPage; i++) {
-			pages.push(<Page num={i} active={i===page} onClick={this.handlePageChange} />);
+			pages.push(<PagerNum num={i} active={i===page} onClick={this.handlePageChange} />);
 		}
 
 		return (
 			<nav className="text-center" aria-label="Page navigation">
 				<ul className="pagination">
-					<PrevPage page={page} disabled={page < 1} />
+					<PagerPrev page={page} disabled={page < 1} />
 					{pages}
-					<NextPage page={page} disabled={page >= (maxPages - 1)} />
+					<PagerNext page={page} disabled={page >= (maxPages - 1)} />
 				</ul>
 			</nav>
 			{(isBottom && page >= maxPages) &&
@@ -119,3 +43,5 @@ class Pager extends Component {
 		);
 	}
 }
+
+default export Pager;
